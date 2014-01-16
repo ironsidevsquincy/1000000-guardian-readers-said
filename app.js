@@ -24,11 +24,11 @@ if ('development' == app.get('env')) {
     app.use(express.errorHandler());
 }
 
-app.get('/', function(req, res) {
-    db.get('articles').find({}, { sort: { count: -1 }, limit: 5 }, function(e, docs){
-        res.send(docs);
-    });
-});
+// app.get('/', function(req, res) {
+//     db.get('articles').find({}, { sort: { count: -1 }, limit: 5 }, function(e, docs){
+//         res.send(docs);
+//     });
+// });
 
 app.get(/^\/(.*)$/, function(req, res) {
      db.get('articles').findOne({ url: req.params[0] }, function(e, article){
@@ -38,22 +38,28 @@ app.get(/^\/(.*)$/, function(req, res) {
 
 app.post(/^\/(.*)$/, function(req, res) {
     var articles = db.get('articles'),
-        url = req.params[0];
+        url = req.params[0],
+        tag = req.param('tag');
     // url should be unique
     articles.index('url', { unique: true });
     articles.findOne({ url: url }, function(e, article){
         if (article) {
+            var tags = article.tags,
+                currentTag = tags[tag];
+            tags[tag] = (currentTag) ? currentTag + 1 : 1;
             articles.update(
                 { url: url },
                 {
-                    url: article.url,
-                    count: parseInt(article.count, 10) + 1
+                    url: url,
+                    tags: tags
                 }
             );
         } else {
+            var tags = {};
+            tags[tag] = 1;
             articles.insert({
                 url: url,
-                count: 1
+                tags: tags
             });
         }
         articles.findOne({ url: url }, function(e, article) {
