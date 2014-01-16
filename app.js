@@ -8,8 +8,7 @@ var express = require('express'),
     path = require('path'),
     mongo = require('mongodb'),
     monk = require('monk'),
-    db = monk('localhost:27017/guardian-fortunes');
-    // db = monk(process.env.MONGOLAB_URI);
+    db = monk(process.env.MONGOLAB_URI);
 
 // all environments
 app.set('port', process.env.PORT || 3000);
